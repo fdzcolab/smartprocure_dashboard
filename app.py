@@ -18,7 +18,7 @@ st.caption("Dataset: 992800103.xlsx – NSM & KPIs computed directly from transa
 # ---------------------------
 # 2. Load data
 # ---------------------------
-FILE_PATH = "992800103.xlsx"   # اگر اسم/مسیر فرق دارد این را عوض کن
+FILE_PATH = "data/992800103.xlsx"   # اگر اسم/مسیر فرق دارد این را عوض کن
 
 @st.cache_data
 def load_data(path):
