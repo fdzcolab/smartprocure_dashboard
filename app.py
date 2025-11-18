@@ -177,37 +177,89 @@ st.plotly_chart(fign, use_container_width=True)
 # ==========================================================
 # 3) Outliers
 # ==========================================================
+# محاسبه Q1, Q3 و IQR
+q1 = daily_f["Outflow"].quantile(0.25)
+q3 = daily_f["Outflow"].quantile(0.75)
+iqr = q3 - q1
+
+# مرزهای شناسایی Outlier (Tukey fences)
+lower_fence = q1 - 1.5 * iqr
+upper_fence = q3 + 1.5 * iqr
+
+# پرچم‌گذاری نقاط پرت
+daily_f["Outlier"] = (daily_f["Outflow"] < lower_fence) | (daily_f["Outflow"] > upper_fence)
+
 st.header("3) Outliers (Daily Usage)")
 c1, c2 = st.columns(2)
 
 with c1:
-    # Boxplot (plotly)
+    # Boxplot (plotly) – افقی
     figb = go.Figure()
-    figb.add_trace(go.Box(x=daily_f["Outflow"], name="Daily Outflow", boxpoints="outliers"))
-    figb.update_layout(height=360, yaxis_title="Outflow Quantity")
+    figb.add_trace(go.Box(
+        x=daily_f["Outflow"],
+        name="Daily Outflow",
+        boxpoints="outliers"
+    ))
+    figb.update_layout(
+        height=360,
+        xaxis_title="Outflow Quantity"
+    )
     st.plotly_chart(figb, use_container_width=True)
 
 with c2:
-    # Histogram with IQR lines
+    # Histogram with Outlier fences
     figh = go.Figure()
-    figh.add_trace(go.Histogram(x=daily_f["Outflow"], nbinsx=30, name="Outflow"))
-    figh.add_vline(x=lb_iqr, line_dash="dash", annotation_text="IQR Lower", line_color="red")
-    figh.add_vline(x=ub_iqr, line_dash="dash", annotation_text="IQR Upper", line_color="red")
-    figh.update_layout(height=360, xaxis_title="Outflow Quantity", yaxis_title="Frequency")
+    figh.add_trace(go.Histogram(
+        x=daily_f["Outflow"],
+        nbinsx=30,
+        name="Outflow"
+    ))
+    figh.add_vline(
+        x=lower_fence,
+        line_dash="dash",
+        annotation_text="Lower Fence (Q1 - 1.5×IQR)",
+        line_color="red"
+    )
+    figh.add_vline(
+        x=upper_fence,
+        line_dash="dash",
+        annotation_text="Upper Fence (Q3 + 1.5×IQR)",
+        line_color="red"
+    )
+    figh.update_layout(
+        height=360,
+        xaxis_title="Outflow Quantity",
+        yaxis_title="Frequency"
+    )
     st.plotly_chart(figh, use_container_width=True)
 
 # Timeline with labels on outliers only
 out_idx = daily_f.index[daily_f["Outlier"]].tolist()
 topk = out_idx[:TOPK_LABELS]
+
 figo = go.Figure()
-figo.add_trace(go.Scatter(x=daily_f["Date Applied"], y=daily_f["Outflow"], mode="lines", name="Daily Usage"))
-figo.add_trace(go.Scatter(x=daily_f.loc[out_idx, "Date Applied"], y=daily_f.loc[out_idx, "Outflow"],
-                          mode="markers+text", name="Outliers",
-                          text=daily_f.loc[out_idx, "Jalali_Date"],
-                          textposition="top center",
-                          textfont=dict(size=9)))
-figo.update_layout(height=380, xaxis_title="Date", yaxis_title="Outflow Quantity")
+figo.add_trace(go.Scatter(
+    x=daily_f["Date Applied"],
+    y=daily_f["Outflow"],
+    mode="lines",
+    name="Daily Usage"
+))
+figo.add_trace(go.Scatter(
+    x=daily_f.loc[out_idx, "Date Applied"],
+    y=daily_f.loc[out_idx, "Outflow"],
+    mode="markers+text",
+    name="Outliers",
+    text=daily_f.loc[out_idx, "Jalali_Date"],
+    textposition="top center",
+    textfont=dict(size=9)
+))
+figo.update_layout(
+    height=380,
+    xaxis_title="Date",
+    yaxis_title="Outflow Quantity"
+)
 st.plotly_chart(figo, use_container_width=True)
+
 
 # ==========================================================
 # 4) Lead Time Coverage
