@@ -10,6 +10,7 @@ from pandas.tseries.offsets import DateOffset
 from datetime import timedelta
 import matplotlib.pyplot as plt
 import ruptures as rpt
+import os
 
 # =============================================================================
 # CONFIGURATION
@@ -18,6 +19,17 @@ class Config:
     """System configuration parameters"""
     TRANSACTIONS_FILE = "data/data_transactions.csv-test"
     LEAD_TIMES_FILE = "data/data_lead_times.csv"
+
+    cwd = os.getcwd()
+    st.write("📁 Current working directory:", cwd)
+    
+    # List files in the current directory
+    files = os.listdir(cwd)
+    st.write("📄 Files in this directory:")
+    for file in files:
+        st.write("- ", file)
+
+    
     TRAIN_TEST_SPLIT = 0.8
     RANDOM_SEED = 42
 
